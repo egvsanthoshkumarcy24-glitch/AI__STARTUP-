@@ -47,12 +47,29 @@ export interface Judge {
   confidence_reason: string;
 }
 
+export interface Market {
+  score: number;
+  market_size_potential: number;
+  scalability: number;
+  future_scopes: string[];
+  verdict: string;
+}
+
 export interface EvaluationDetails {
   investor: Investor;
   risk: Risk;
   customer: Customer;
+  market: Market;
   debate: Debate;
   judge: Judge;
+}
+
+export interface PitchData {
+  problem: string;
+  solution: string;
+  audience: string;
+  revenue: string;
+  competition: string;
 }
 
 export interface EvaluationResult {

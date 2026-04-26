@@ -3,7 +3,20 @@ from utils.parser import parse_json
 
 def master_agent(pitch_data: dict):
 
-    pitch_text = pitch_data.get("pitch", str(pitch_data))
+    problem = pitch_data.get("problem", "")
+    solution = pitch_data.get("solution", "")
+    audience = pitch_data.get("audience", "")
+    revenue = pitch_data.get("revenue", "")
+    competition = pitch_data.get("competition", "")
+    
+    pitch_text = f"""
+    PROBLEM: {problem}
+    SOLUTION: {solution}
+    TARGET AUDIENCE: {audience}
+    REVENUE MODEL: {revenue}
+    EXISTING ALTERNATIVES/COMPETITION: {competition}
+    """
+    
     kill_mode = pitch_data.get("kill_mode", False)
 
     kill_instructions = ""
@@ -55,6 +68,13 @@ Return ONLY JSON:
     "conflicts": [],
     "winner": "INVESTOR/RISK",
     "insight": "short sentence"
+  }},
+  "market": {{
+    "score": number (1-10),
+    "market_size_potential": number (1-10),
+    "scalability": number (1-10),
+    "future_scopes": [],
+    "verdict": "short sentence"
   }},
   "judge": {{
   "final_score": number (1-10),

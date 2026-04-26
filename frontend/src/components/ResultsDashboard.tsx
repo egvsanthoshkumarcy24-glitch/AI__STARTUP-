@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { EvaluationResult } from '../types';
 import { 
   Gavel, TrendingUp, AlertTriangle, Users, Swords, 
-  RotateCcw, ShieldAlert, Target, Zap, CheckCircle2, XCircle, Info
+  RotateCcw, ShieldAlert, Target, Zap, CheckCircle2, XCircle, Info, Loader2, Download
 } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import _CountUp from 'react-countup';
+import { pdf } from '@react-pdf/renderer';
+import PDFReport from './PDFReport';
 const CountUp = (_CountUp as any).default || _CountUp;
 
 interface Props {
   result: EvaluationResult;
+  pitch: string;
   onReset: () => void;
 }
 
@@ -50,8 +53,28 @@ const StatBar = ({ score, colorClass, bgClass }: { score: number, colorClass: st
   );
 };
 
-const ResultsDashboard: React.FC<Props> = ({ result, onReset }) => {
+const ResultsDashboard: React.FC<Props> = ({ result, pitch, onReset }) => {
   const { summary, details } = result;
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    setPdfLoading(true);
+    try {
+      const blob = await pdf(<PDFReport result={result} pitch={pitch} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `startup-evaluation-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const getVerdictColor = (verdict: string) => {
     if (typeof verdict !== 'string') return 'text-amber-400 bg-amber-400/10';
@@ -365,7 +388,16 @@ const ResultsDashboard: React.FC<Props> = ({ result, onReset }) => {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="flex justify-center pt-8">
+      <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4 pt-8">
+        <button
+          onClick={handleDownloadPDF}
+          disabled={pdfLoading}
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {pdfLoading ? 'Generating Report...' : 'Export PDF Report'}
+        </button>
+
         <button
           onClick={onReset}
           className="flex items-center gap-2 px-6 py-3 rounded-full border border-slate-600 hover:bg-slate-800 hover:border-slate-500 transition-colors text-slate-300 font-medium"
