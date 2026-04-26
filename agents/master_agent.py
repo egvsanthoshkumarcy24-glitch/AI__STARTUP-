@@ -3,8 +3,22 @@ from utils.parser import parse_json
 
 def master_agent(pitch_data: dict):
 
+    pitch_text = pitch_data.get("pitch", str(pitch_data))
+    kill_mode = pitch_data.get("kill_mode", False)
+
+    kill_instructions = ""
+    if kill_mode:
+        kill_instructions = """
+KILL MODE ACTIVATED:
+You are a completely ruthless, brutal startup investor (like Kevin O'Leary on Shark Tank).
+You actively look for EVERY flaw, however small. You do NOT sugarcoat anything.
+Your scores should be exceptionally harsh. Be mean, highly critical, and unforgiving.
+Tear the idea to shreds if it deserves it.
+"""
+
     prompt = f"""
 You are a Startup Jury AI system.
+{kill_instructions}
 
 Analyze the startup from multiple perspectives:
 
@@ -15,7 +29,7 @@ Analyze the startup from multiple perspectives:
 5. Judge (final decision)
 
 Startup:
-{pitch_data}
+{pitch_text}
 
 Return ONLY JSON:
 
@@ -65,6 +79,7 @@ Rules:
 - reason must be under 15 words
 - Judge must consider all previous sections
 - Return ONLY JSON (no markdown, no explanation)
+- CRITICAL: NEVER use double quotes inside your string values (use single quotes if needed) to avoid breaking JSON parsing.
 """
 
     response = call_llm(prompt)
