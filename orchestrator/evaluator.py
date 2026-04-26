@@ -1,64 +1,34 @@
-from agents.investor import investor_agent
-from agents.risk import risk_agent
-from agents.customer import customer_agent
-from agents.judge import judge_agent
-from agents.debate import debate_agent
-
+from agents.master_agent import master_agent
 
 def evaluate_startup(pitch_data: dict):
 
-    # --- Run Agents Safely ---
     try:
-        investor = investor_agent(pitch_data)
+        result = master_agent(pitch_data)
     except Exception as e:
-        print("Investor Error:", e)
-        investor = {"error": "Investor agent failed"}
-
-    try:
-        risk = risk_agent(pitch_data)
-    except Exception as e:
-        print("Risk Error:", e)
-        risk = {"error": "Risk agent failed"}
-
-    try:
-        customer = customer_agent(pitch_data)
-    except Exception as e:
-        print("Customer Error:", e)
-        customer = {"error": "Customer agent failed"}
-
-    # --- Debate (Investor vs Risk) ---
-    try:
-        debate = debate_agent(investor, risk)
-    except Exception as e:
-        print("Debate Error:", e)
-        debate = {
-            "conflicts": [],
-            "winner": "UNKNOWN",
-            "insight": "Debate failed"
+        print("Master Agent Error:", e)
+        return {
+            "summary": {
+                "final_score": None,
+                "verdict": "ERROR",
+                "confidence": None,
+                "fatal_flaw": "System failure",
+                "recommendation": None,
+                "investment_type": None
+            },
+            "details": {}
         }
 
-    # --- Judge Decision ---
-    try:
-        judge = judge_agent(investor, risk, customer)
-    except Exception as e:
-        print("Judge Error:", e)
-        judge = {
-            "final_score": None,
-            "verdict": "ERROR",
-            "reason": "Judge agent failed"
-        }
+    judge = result.get("judge", {})
 
-    # --- Final Structured Output ---
     return {
         "summary": {
             "final_score": judge.get("final_score"),
-            "verdict": judge.get("verdict")
+            "verdict": judge.get("verdict"),
+            "confidence": judge.get("confidence"),
+            "fatal_flaw": judge.get("fatal_flaw"),
+            "key_reason": judge.get("reason"),
+            "recommendation": judge.get("recommendation"),
+            "investment_type": judge.get("investment_type")
         },
-        "details": {
-            "investor": investor,
-            "risk": risk,
-            "customer": customer,
-            "debate": debate,   # 👈 NOW INCLUDED
-            "judge": judge
-        }
+        "details": result
     }

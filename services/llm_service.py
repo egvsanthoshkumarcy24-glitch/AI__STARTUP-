@@ -9,7 +9,13 @@ def call_llm(prompt: str):
             model="gemini-2.5-flash",
             contents=prompt,
         )
+
+        print("\n===== LLM RESPONSE =====\n")
+        print(response.text)
+        print("\n========================\n")
+
         return response.text
+
     except Exception as e:
-        print("LLM ERROR:", e)
-        return "{}"   # prevents crash
+        print("❌ LLM ERROR:", e)
+        raise e
